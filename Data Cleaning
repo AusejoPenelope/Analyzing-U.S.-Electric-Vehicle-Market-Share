@@ -1,0 +1,32 @@
+CLEAN DATA
+1. Modify column names
+
+ALTER TABLE vehicle_data RENAME COLUMN `Electric (EV)` TO EV;
+ALTER TABLE vehicle_data RENAME COLUMN `Plug-In Hybrid Electric (PHEV)` TO PHEV;
+ALTER TABLE vehicle_data RENAME COLUMN `Hybrid Electric (HEV)` TO HEV;
+ALTER TABLE vehicle_data RENAME COLUMN `Ethanol/Flex (E85)` TO E85;
+ALTER TABLE vehicle_data RENAME COLUMN `Compressed Natural Gas (CNG)` TO CNG;
+ALTER TABLE vehicle_data RENAME COLUMN `Unknown Fuel` TO unknown_fuel;
+
+
+WITH sum_calc AS 
+(SELECT
+    state,
+    electric,
+    phev,
+    hev,
+    gasoline,
+    (electric + phev + hev + biodiesel + e85 + cng + propane + hydrogen + methanol + gasoline + diesel + unknown_fuel) AS total_vehicles
+FROM  ev_regdata
+)
+SELECT
+    state,
+    electric,
+    ROUND((electric*1.0/total_vehicles)*100,2) AS ev_percentage,
+    phev,
+    ROUND((phev*1.0/total_vehicles)*100,2) AS phev_percentage,
+    hev,
+    ROUND((hev*1.0/total_vehicles)*100,2) AS hev_percentage,
+    gasoline,
+    ROUND((gasoline*1.0/total_vehicles)*100,2) AS gas_percentage
+FROM sum_calc;
